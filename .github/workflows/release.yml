@@ -29,11 +29,9 @@ jobs:
 
       - run: bun run build
 
-      - name: Setup Node.js for npm publish
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          registry-url: 'https://registry.npmjs.org'
+      # This ensures ability to connect to npm via OIDC.
+      - name: Update npm
+        run: sudo npm install -g npm@latest
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
