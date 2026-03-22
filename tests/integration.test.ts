@@ -72,9 +72,8 @@ describe("Integration: full offline flow", () => {
     expect(onlineData).toEqual(sessionData);
 
     // Wait for fire-and-forget cache write
-    await vi.waitFor(() => {
-      expect(storage.set).toHaveBeenCalled();
-    });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(storage.set).toHaveBeenCalled();
 
     // Phase 2: Offline — same GET now fails, should serve from cache
     const offlineFetch = vi.fn(() =>
@@ -121,5 +120,100 @@ describe("Integration: full offline flow", () => {
     // @ts-expect-error — getActions signature varies
     const actions = plugin.getActions!(() => {}, {}, undefined);
     expect(actions.clearCache).toBeTypeOf("function");
+  });
+});
+
+describe("Integration: createFetch pipeline (applySchemaPlugin interaction)", () => {
+  it("offline fallback works through the full createFetch pipeline", async () => {
+    const { createFetch } = await import("@better-fetch/fetch");
+
+    const storage = createMockStorage();
+    const plugin = offlinePlugin({ storage });
+    const fetchPlugin = plugin.fetchPlugins![0];
+
+    const sessionData = {
+      session: { id: "sess_1", userId: "user_1" },
+      user: { id: "user_1", name: "Alice", email: "alice@test.com" },
+    };
+
+    // Phase 1: Online — fetch through createFetch pipeline
+    const onlineMock = vi.fn((_input: any, _init: any) =>
+      Promise.resolve(jsonResponse(sessionData)),
+    );
+
+    const $fetchOnline = createFetch({
+      baseURL: "http://localhost:3000/api/auth",
+      method: "GET",
+      customFetchImpl: onlineMock as any,
+      plugins: [fetchPlugin],
+    });
+
+    const onlineResult = await $fetchOnline("/get-session", { method: "GET" });
+    expect(onlineResult.data).toEqual(sessionData);
+    expect(onlineMock).toHaveBeenCalledOnce();
+
+    // Wait for fire-and-forget cache write
+    await new Promise((r) => setTimeout(r, 50));
+    expect(storage.set).toHaveBeenCalled();
+
+    // Phase 2: Offline — same pipeline, but fetch throws
+    const offlineMock = vi.fn(() =>
+      Promise.reject(new TypeError("Failed to fetch")),
+    );
+
+    const $fetchOffline = createFetch({
+      baseURL: "http://localhost:3000/api/auth",
+      method: "GET",
+      customFetchImpl: offlineMock as any,
+      plugins: [fetchPlugin],
+    });
+
+    const offlineResult = await $fetchOffline("/get-session", { method: "GET" });
+    expect(offlineResult.data).toEqual(sessionData);
+    expect(offlineResult.error).toBeNull();
+  });
+
+  it("offline fallback works with a SINGLE createFetch instance (realistic scenario)", async () => {
+    const { createFetch } = await import("@better-fetch/fetch");
+
+    const storage = createMockStorage();
+    const plugin = offlinePlugin({ storage });
+    const fetchPlugin = plugin.fetchPlugins![0];
+
+    const sessionData = {
+      session: { id: "sess_1", userId: "user_1" },
+      user: { id: "user_1", name: "Alice", email: "alice@test.com" },
+    };
+
+    // Single mock that switches behavior: online first, then offline
+    let isOffline = false;
+    const mockFetch = vi.fn((_input: any, _init: any) => {
+      if (isOffline) {
+        return Promise.reject(new TypeError("Failed to fetch"));
+      }
+      return Promise.resolve(jsonResponse(sessionData));
+    });
+
+    // Single createFetch instance (like the real app)
+    const $fetch = createFetch({
+      baseURL: "http://localhost:3000/api/auth",
+      method: "GET",
+      customFetchImpl: mockFetch as any,
+      plugins: [fetchPlugin],
+    });
+
+    // Phase 1: Online call — should cache
+    const onlineResult = await $fetch("/get-session", { method: "GET" });
+    expect(onlineResult.data).toEqual(sessionData);
+
+    // Wait for fire-and-forget cache write
+    await new Promise((r) => setTimeout(r, 50));
+    expect(storage.set).toHaveBeenCalled();
+
+    // Phase 2: Go offline, same $fetch instance
+    isOffline = true;
+    const offlineResult = await $fetch("/get-session", { method: "GET" });
+    expect(offlineResult.data).toEqual(sessionData);
+    expect(offlineResult.error).toBeNull();
   });
 });

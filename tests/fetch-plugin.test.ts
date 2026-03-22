@@ -179,4 +179,39 @@ describe("createOfflineFetchPlugin", () => {
     await new Promise((r) => setTimeout(r, 10));
     expect(storage.set).not.toHaveBeenCalled();
   });
+
+  // T8: Regression — init mutates fetchOptions so later plugins don't overwrite wrapping
+  it("mutates fetchOptions.customFetchImpl in place (survives plugin reordering)", async () => {
+    const plugin = createOfflineFetchPlugin(storage, {});
+    const mockFetch = vi.fn(() => Promise.resolve(jsonResponse({ user: "alice" })));
+
+    // Simulate what @better-fetch/fetch's initializePlugins does:
+    // it passes the SAME `options` reference to every plugin's init(),
+    // and a later plugin (applySchemaPlugin) may return that same reference,
+    // overwriting any new object the offline plugin returned.
+    const sharedOptions: Record<string, unknown> = {
+      method: "GET",
+      customFetchImpl: mockFetch,
+    };
+
+    const result = plugin.init!("http://localhost/api/auth/get-session", sharedOptions as any);
+    const { options } = result instanceof Promise ? await result : result;
+
+    // The offline plugin must have mutated the ORIGINAL sharedOptions object
+    // so that even if a later plugin returns it unchanged, wrapping persists.
+    expect(sharedOptions.customFetchImpl).not.toBe(mockFetch);
+    expect(sharedOptions.customFetchImpl).toBe(options!.customFetchImpl);
+
+    // Verify the wrapped fetch actually works
+    const response = await (sharedOptions.customFetchImpl as typeof fetch)(
+      "http://localhost/api/auth/get-session",
+      {} as any,
+    );
+    const data = await response.json();
+    expect(data).toEqual({ user: "alice" });
+
+    await vi.waitFor(() => {
+      expect(storage.set).toHaveBeenCalled();
+    });
+  });
 });

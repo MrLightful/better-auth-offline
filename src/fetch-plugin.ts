@@ -95,12 +95,20 @@ export function createOfflineFetchPlugin(
         }
       };
 
+      // Mutate the original options object directly rather than spreading
+      // into a new one. @better-fetch/fetch's initializePlugins passes the
+      // same `options` reference to every plugin's init(). If we return a
+      // new object, a later plugin (e.g. applySchemaPlugin) that returns
+      // the original reference will overwrite our customFetchImpl, silently
+      // disabling the offline cache. By mutating in place, the wrapping
+      // survives regardless of plugin ordering.
+      if (fetchOptions) {
+        fetchOptions.customFetchImpl = wrappedFetch;
+      }
+
       return {
         url,
-        options: {
-          ...fetchOptions,
-          customFetchImpl: wrappedFetch,
-        },
+        options: fetchOptions ?? { customFetchImpl: wrappedFetch },
       };
     },
   };
