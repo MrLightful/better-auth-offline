@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { offlinePlugin } from "../src/index.js";
-import type { StorageAdapter, CacheEntry } from "../src/types.js";
+import type { CacheEntry, StorageAdapter } from "../src/types.js";
 
 /**
  * Integration tests that verify the full plugin behavior end-to-end.
@@ -13,9 +13,15 @@ function createMockStorage(): StorageAdapter & { store: Map<string, unknown> } {
   return {
     store,
     get: vi.fn(async (key) => store.get(key) ?? null),
-    set: vi.fn(async (key, value) => { store.set(key, value); }),
-    delete: vi.fn(async (key) => { store.delete(key); }),
-    clear: vi.fn(async () => { store.clear(); }),
+    set: vi.fn(async (key, value) => {
+      store.set(key, value);
+    }),
+    delete: vi.fn(async (key) => {
+      store.delete(key);
+    }),
+    clear: vi.fn(async () => {
+      store.clear();
+    }),
   };
 }
 
@@ -34,7 +40,7 @@ async function simulateFetch(
   plugin: ReturnType<typeof offlinePlugin>,
   url: string,
   mockFetch: typeof globalThis.fetch,
-  method = "GET",
+  method = "GET"
 ) {
   const fetchPlugin = plugin.fetchPlugins![0];
   const result = fetchPlugin.init!(url, {
@@ -66,7 +72,7 @@ describe("Integration: full offline flow", () => {
     const onlineResponse = await simulateFetch(
       plugin,
       "http://localhost/api/auth/get-session",
-      onlineFetch,
+      onlineFetch
     );
     const onlineData = await onlineResponse.json();
     expect(onlineData).toEqual(sessionData);
@@ -77,12 +83,12 @@ describe("Integration: full offline flow", () => {
 
     // Phase 2: Offline — same GET now fails, should serve from cache
     const offlineFetch = vi.fn(() =>
-      Promise.reject(new TypeError("Failed to fetch")),
+      Promise.reject(new TypeError("Failed to fetch"))
     );
     const offlineResponse = await simulateFetch(
       plugin,
       "http://localhost/api/auth/get-session",
-      offlineFetch,
+      offlineFetch
     );
     const offlineData = await offlineResponse.json();
 
@@ -138,7 +144,7 @@ describe("Integration: createFetch pipeline (applySchemaPlugin interaction)", ()
 
     // Phase 1: Online — fetch through createFetch pipeline
     const onlineMock = vi.fn((_input: any, _init: any) =>
-      Promise.resolve(jsonResponse(sessionData)),
+      Promise.resolve(jsonResponse(sessionData))
     );
 
     const $fetchOnline = createFetch({
@@ -158,7 +164,7 @@ describe("Integration: createFetch pipeline (applySchemaPlugin interaction)", ()
 
     // Phase 2: Offline — same pipeline, but fetch throws
     const offlineMock = vi.fn(() =>
-      Promise.reject(new TypeError("Failed to fetch")),
+      Promise.reject(new TypeError("Failed to fetch"))
     );
 
     const $fetchOffline = createFetch({
@@ -168,7 +174,9 @@ describe("Integration: createFetch pipeline (applySchemaPlugin interaction)", ()
       plugins: [fetchPlugin],
     });
 
-    const offlineResult = await $fetchOffline("/get-session", { method: "GET" });
+    const offlineResult = await $fetchOffline("/get-session", {
+      method: "GET",
+    });
     expect(offlineResult.data).toEqual(sessionData);
     expect(offlineResult.error).toBeNull();
   });

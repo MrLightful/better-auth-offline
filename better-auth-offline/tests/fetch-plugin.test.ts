@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createOfflineFetchPlugin } from "../src/fetch-plugin.js";
-import type { StorageAdapter, CacheEntry } from "../src/types.js";
+import type { CacheEntry, StorageAdapter } from "../src/types.js";
 
 function createMockStorage(): StorageAdapter & {
   store: Map<string, unknown>;
@@ -38,7 +38,9 @@ describe("createOfflineFetchPlugin", () => {
   // T1: Online GET success → caches response
   it("caches successful GET responses", async () => {
     const plugin = createOfflineFetchPlugin(storage, {});
-    const mockFetch = vi.fn(() => Promise.resolve(jsonResponse({ user: "alice" })));
+    const mockFetch = vi.fn(() =>
+      Promise.resolve(jsonResponse({ user: "alice" }))
+    );
 
     const result = plugin.init!("http://localhost/api/auth/get-session", {
       method: "GET",
@@ -46,7 +48,10 @@ describe("createOfflineFetchPlugin", () => {
     });
 
     const { options } = result instanceof Promise ? await result : result;
-    const response = await options!.customFetchImpl!("http://localhost/api/auth/get-session", {});
+    const response = await options!.customFetchImpl!(
+      "http://localhost/api/auth/get-session",
+      {}
+    );
     const data = await response.json();
 
     expect(data).toEqual({ user: "alice" });
@@ -67,7 +72,9 @@ describe("createOfflineFetchPlugin", () => {
     storage.store.set("/api/auth/get-session", entry);
 
     const plugin = createOfflineFetchPlugin(storage, {});
-    const mockFetch = vi.fn(() => Promise.reject(new TypeError("Failed to fetch")));
+    const mockFetch = vi.fn(() =>
+      Promise.reject(new TypeError("Failed to fetch"))
+    );
 
     const result = plugin.init!("http://localhost/api/auth/get-session", {
       method: "GET",
@@ -75,7 +82,10 @@ describe("createOfflineFetchPlugin", () => {
     });
 
     const { options } = result instanceof Promise ? await result : result;
-    const response = await options!.customFetchImpl!("http://localhost/api/auth/get-session", {});
+    const response = await options!.customFetchImpl!(
+      "http://localhost/api/auth/get-session",
+      {}
+    );
     const data = await response.json();
 
     expect(data).toEqual({ user: "alice" });
@@ -85,7 +95,9 @@ describe("createOfflineFetchPlugin", () => {
   // T3: Online GET network failure + no cache → propagates error
   it("propagates error when network fails and no cache exists", async () => {
     const plugin = createOfflineFetchPlugin(storage, {});
-    const mockFetch = vi.fn(() => Promise.reject(new TypeError("Failed to fetch")));
+    const mockFetch = vi.fn(() =>
+      Promise.reject(new TypeError("Failed to fetch"))
+    );
 
     const result = plugin.init!("http://localhost/api/auth/get-session", {
       method: "GET",
@@ -95,18 +107,23 @@ describe("createOfflineFetchPlugin", () => {
     const { options } = result instanceof Promise ? await result : result;
 
     await expect(
-      options!.customFetchImpl!("http://localhost/api/auth/get-session", {}),
+      options!.customFetchImpl!("http://localhost/api/auth/get-session", {})
     ).rejects.toThrow("Failed to fetch");
   });
 
   // T4: Offline GET → serves from cache (same as T2, but semantically distinct)
   it("serves cached data when fetch throws AbortError", async () => {
-    const entry: CacheEntry = { data: { session: "active" }, cachedAt: Date.now() };
+    const entry: CacheEntry = {
+      data: { session: "active" },
+      cachedAt: Date.now(),
+    };
     storage.store.set("/api/auth/get-session", entry);
 
     const plugin = createOfflineFetchPlugin(storage, {});
     const mockFetch = vi.fn(() =>
-      Promise.reject(new DOMException("The operation was aborted", "AbortError")),
+      Promise.reject(
+        new DOMException("The operation was aborted", "AbortError")
+      )
     );
 
     const result = plugin.init!("http://localhost/api/auth/get-session", {
@@ -115,7 +132,10 @@ describe("createOfflineFetchPlugin", () => {
     });
 
     const { options } = result instanceof Promise ? await result : result;
-    const response = await options!.customFetchImpl!("http://localhost/api/auth/get-session", {});
+    const response = await options!.customFetchImpl!(
+      "http://localhost/api/auth/get-session",
+      {}
+    );
     const data = await response.json();
 
     expect(data).toEqual({ session: "active" });
@@ -125,7 +145,9 @@ describe("createOfflineFetchPlugin", () => {
   it("propagates AbortError when no cache exists", async () => {
     const plugin = createOfflineFetchPlugin(storage, {});
     const mockFetch = vi.fn(() =>
-      Promise.reject(new DOMException("The operation was aborted", "AbortError")),
+      Promise.reject(
+        new DOMException("The operation was aborted", "AbortError")
+      )
     );
 
     const result = plugin.init!("http://localhost/api/auth/get-session", {
@@ -136,7 +158,7 @@ describe("createOfflineFetchPlugin", () => {
     const { options } = result instanceof Promise ? await result : result;
 
     await expect(
-      options!.customFetchImpl!("http://localhost/api/auth/get-session", {}),
+      options!.customFetchImpl!("http://localhost/api/auth/get-session", {})
     ).rejects.toThrow();
   });
 
@@ -151,7 +173,10 @@ describe("createOfflineFetchPlugin", () => {
     });
 
     const { options } = result instanceof Promise ? await result : result;
-    await options!.customFetchImpl!("http://localhost/api/auth/sign-in/email", {});
+    await options!.customFetchImpl!(
+      "http://localhost/api/auth/sign-in/email",
+      {}
+    );
 
     expect(mockFetch).toHaveBeenCalledOnce();
     expect(storage.set).not.toHaveBeenCalled();
@@ -161,16 +186,22 @@ describe("createOfflineFetchPlugin", () => {
   it("skips caching for non-allowlisted paths", async () => {
     const plugin = createOfflineFetchPlugin(storage, {});
     const mockFetch = vi.fn(() =>
-      Promise.resolve(jsonResponse({ data: "something" })),
+      Promise.resolve(jsonResponse({ data: "something" }))
     );
 
-    const result = plugin.init!("http://localhost/api/auth/some-unknown-endpoint", {
-      method: "GET",
-      customFetchImpl: mockFetch,
-    });
+    const result = plugin.init!(
+      "http://localhost/api/auth/some-unknown-endpoint",
+      {
+        method: "GET",
+        customFetchImpl: mockFetch,
+      }
+    );
 
     const { options } = result instanceof Promise ? await result : result;
-    await options!.customFetchImpl!("http://localhost/api/auth/some-unknown-endpoint", {});
+    await options!.customFetchImpl!(
+      "http://localhost/api/auth/some-unknown-endpoint",
+      {}
+    );
 
     expect(mockFetch).toHaveBeenCalledOnce();
 
@@ -182,7 +213,9 @@ describe("createOfflineFetchPlugin", () => {
   // T8: Regression — init mutates fetchOptions so later plugins don't overwrite wrapping
   it("mutates fetchOptions.customFetchImpl in place (survives plugin reordering)", async () => {
     const plugin = createOfflineFetchPlugin(storage, {});
-    const mockFetch = vi.fn(() => Promise.resolve(jsonResponse({ user: "alice" })));
+    const mockFetch = vi.fn(() =>
+      Promise.resolve(jsonResponse({ user: "alice" }))
+    );
 
     // Simulate what @better-fetch/fetch's initializePlugins does:
     // it passes the SAME `options` reference to every plugin's init(),
@@ -193,7 +226,10 @@ describe("createOfflineFetchPlugin", () => {
       customFetchImpl: mockFetch,
     };
 
-    const result = plugin.init!("http://localhost/api/auth/get-session", sharedOptions as any);
+    const result = plugin.init!(
+      "http://localhost/api/auth/get-session",
+      sharedOptions as any
+    );
     const { options } = result instanceof Promise ? await result : result;
 
     // The offline plugin must have mutated the ORIGINAL sharedOptions object
@@ -204,7 +240,7 @@ describe("createOfflineFetchPlugin", () => {
     // Verify the wrapped fetch actually works
     const response = await (sharedOptions.customFetchImpl as typeof fetch)(
       "http://localhost/api/auth/get-session",
-      {} as any,
+      {} as any
     );
     const data = await response.json();
     expect(data).toEqual({ user: "alice" });

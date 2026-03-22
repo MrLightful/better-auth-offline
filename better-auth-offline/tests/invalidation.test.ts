@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { offlinePlugin } from "../src/index.js";
 import type { StorageAdapter } from "../src/types.js";
 
@@ -6,9 +6,15 @@ function createMockStorage(): StorageAdapter {
   const store = new Map<string, unknown>();
   return {
     get: vi.fn(async (key) => store.get(key) ?? null),
-    set: vi.fn(async (key, value) => { store.set(key, value); }),
-    delete: vi.fn(async (key) => { store.delete(key); }),
-    clear: vi.fn(async () => { store.clear(); }),
+    set: vi.fn(async (key, value) => {
+      store.set(key, value);
+    }),
+    delete: vi.fn(async (key) => {
+      store.delete(key);
+    }),
+    clear: vi.fn(async () => {
+      store.clear();
+    }),
   };
 }
 

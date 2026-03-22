@@ -1,3 +1,5 @@
+const STATIC_ASSET_RE = /\.(js|css|png|jpg|svg|ico|woff2?)$/;
+
 /// Service Worker for better-auth-offline example app.
 ///
 /// Caches the app shell (HTML pages and static assets) so the app loads offline.
@@ -8,22 +10,22 @@ const CACHE_NAME = "app-shell-v1";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      cache.addAll(["/", "/dashboard"])
-    )
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(["/", "/dashboard"]))
   );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key !== CACHE_NAME)
+            .map((key) => caches.delete(key))
+        )
       )
-    )
   );
   self.clients.claim();
 });
@@ -59,7 +61,7 @@ self.addEventListener("fetch", (event) => {
   // Static assets (JS, CSS, fonts, images): cache-first with network fallback
   if (
     url.pathname.startsWith("/_next/") ||
-    /\.(js|css|png|jpg|svg|ico|woff2?)$/.test(url.pathname)
+    STATIC_ASSET_RE.test(url.pathname)
   ) {
     event.respondWith(
       caches.match(event.request).then(

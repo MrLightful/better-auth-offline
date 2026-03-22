@@ -1,4 +1,4 @@
-import type { StorageAdapter, CacheEntry } from "../types.js";
+import type { CacheEntry, StorageAdapter } from "../types.js";
 
 const DEFAULT_DB_NAME = "better-auth-offline";
 const STORE_NAME = "cache";
@@ -9,12 +9,14 @@ const STORE_NAME = "cache";
  * @param dbName - Name of the IndexedDB database. Defaults to "better-auth-offline".
  */
 export function createIndexedDBAdapter(
-  dbName: string = DEFAULT_DB_NAME,
+  dbName: string = DEFAULT_DB_NAME
 ): StorageAdapter {
   let dbPromise: Promise<IDBDatabase> | null = null;
 
   function openDB(): Promise<IDBDatabase> {
-    if (dbPromise) return dbPromise;
+    if (dbPromise) {
+      return dbPromise;
+    }
 
     dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open(dbName, 1);

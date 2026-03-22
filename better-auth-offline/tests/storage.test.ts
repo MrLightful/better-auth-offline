@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { StorageAdapter } from "../src/types.js";
 
 /**
@@ -7,7 +7,7 @@ import type { StorageAdapter } from "../src/types.js";
  */
 export function testStorageAdapter(
   name: string,
-  createAdapter: () => StorageAdapter,
+  createAdapter: () => StorageAdapter
 ) {
   describe(`StorageAdapter: ${name}`, () => {
     // T8: get/set/delete operations
@@ -67,9 +67,15 @@ function createMemoryAdapter(): StorageAdapter {
   const store = new Map<string, unknown>();
   return {
     get: async (key) => store.get(key) ?? null,
-    set: async (key, value) => { store.set(key, value); },
-    delete: async (key) => { store.delete(key); },
-    clear: async () => { store.clear(); },
+    set: async (key, value) => {
+      store.set(key, value);
+    },
+    delete: async (key) => {
+      store.delete(key);
+    },
+    clear: async () => {
+      store.clear();
+    },
   };
 }
 

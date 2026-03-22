@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
 export default function Dashboard() {
@@ -78,14 +78,20 @@ export default function Dashboard() {
       <section style={sectionStyle}>
         <h2 style={sectionTitleStyle}>Cache Controls</h2>
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-          <button onClick={handleClearCache} style={buttonStyle}>
+          <button onClick={handleClearCache} style={buttonStyle} type="button">
             Clear Cache
           </button>
-          <button onClick={handleSignOut} style={{ ...buttonStyle, backgroundColor: "#e00" }}>
+          <button
+            onClick={handleSignOut}
+            style={{ ...buttonStyle, backgroundColor: "#e00" }}
+            type="button"
+          >
             Sign Out
           </button>
           {cacheMessage && (
-            <span style={{ color: "#16a34a", fontSize: "0.9rem" }}>{cacheMessage}</span>
+            <span style={{ color: "#16a34a", fontSize: "0.9rem" }}>
+              {cacheMessage}
+            </span>
           )}
         </div>
         <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
@@ -105,15 +111,18 @@ export default function Dashboard() {
             Check the <strong>Offline</strong> checkbox
           </li>
           <li>
-            Refresh the page — session data should still appear (served from IndexedDB cache)
+            Refresh the page — session data should still appear (served from
+            IndexedDB cache)
           </li>
           <li>
-            The status indicator above should show <strong style={{ color: "#e00" }}>Offline</strong>
+            The status indicator above should show{" "}
+            <strong style={{ color: "#e00" }}>Offline</strong>
           </li>
           <li>Uncheck Offline — indicator returns to Online</li>
         </ol>
         <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.75rem" }}>
-          To inspect the cache: DevTools → Application → IndexedDB → better-auth-offline → cache
+          To inspect the cache: DevTools → Application → IndexedDB →
+          better-auth-offline → cache
         </p>
       </section>
     </div>

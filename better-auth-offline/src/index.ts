@@ -1,13 +1,17 @@
 import type { BetterAuthClientPlugin } from "better-auth/client";
-import type { OfflinePluginOptions, StorageAdapter } from "./types.js";
+import { createIndexedDBAdapter } from "./adapters/indexeddb.js";
 import { createOfflineFetchPlugin } from "./fetch-plugin.js";
 import { createOnlineStatusAtom } from "./online-status.js";
-import { createIndexedDBAdapter } from "./adapters/indexeddb.js";
+import type { OfflinePluginOptions, StorageAdapter } from "./types.js";
 
-// Re-export types for consumers
-export type { StorageAdapter, OfflinePluginOptions, CacheEntry } from "./types.js";
 export { createIndexedDBAdapter } from "./adapters/indexeddb.js";
 export { createOnlineStatusAtom } from "./online-status.js";
+// Re-export types for consumers
+export type {
+  CacheEntry,
+  OfflinePluginOptions,
+  StorageAdapter,
+} from "./types.js";
 
 const SIGN_OUT_PATHS = ["/sign-out", "/signout", "/logout"];
 const SIGN_IN_PATHS = ["/sign-in", "/signin", "/login"];
@@ -36,10 +40,9 @@ function isAuthChangePath(path: string): boolean {
  * ```
  */
 export function offlinePlugin(
-  options: OfflinePluginOptions = {},
+  options: OfflinePluginOptions = {}
 ): BetterAuthClientPlugin {
-  const storage: StorageAdapter =
-    options.storage ?? createIndexedDBAdapter();
+  const storage: StorageAdapter = options.storage ?? createIndexedDBAdapter();
 
   return {
     id: "better-auth-offline",

@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
-import { testStorageAdapter } from "./storage.test.js";
 import { createIndexedDBAdapter } from "../src/adapters/indexeddb.js";
+import { testStorageAdapter } from "./storage.test.js";
 
 let dbCounter = 0;
 

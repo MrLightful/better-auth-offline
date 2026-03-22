@@ -1,6 +1,10 @@
 import type { BetterFetchPlugin } from "@better-fetch/fetch";
-import type { StorageAdapter, CacheEntry, OfflinePluginOptions } from "./types.js";
 import { getAllowlist, isAllowlisted } from "./allowlist.js";
+import type {
+  CacheEntry,
+  OfflinePluginOptions,
+  StorageAdapter,
+} from "./types.js";
 
 /**
  * Extracts the pathname from a URL string, stripping query params.
@@ -8,10 +12,13 @@ import { getAllowlist, isAllowlisted } from "./allowlist.js";
  */
 export function extractPath(urlOrPath: string | URL): string {
   try {
-    const url = typeof urlOrPath === "string" && urlOrPath.startsWith("http")
-      ? new URL(urlOrPath)
-      : null;
-    if (url) return url.pathname;
+    const url =
+      typeof urlOrPath === "string" && urlOrPath.startsWith("http")
+        ? new URL(urlOrPath)
+        : null;
+    if (url) {
+      return url.pathname;
+    }
   } catch {
     // Not a valid URL, treat as path
   }
@@ -25,8 +32,12 @@ export function extractPath(urlOrPath: string | URL): string {
  * Checks if a network error is a connectivity failure (not an HTTP error).
  */
 function isNetworkError(error: unknown): boolean {
-  if (error instanceof TypeError) return true;
-  if (error instanceof DOMException && error.name === "AbortError") return true;
+  if (error instanceof TypeError) {
+    return true;
+  }
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return true;
+  }
   return false;
 }
 
@@ -41,7 +52,7 @@ function isNetworkError(error: unknown): boolean {
  */
 export function createOfflineFetchPlugin(
   storage: StorageAdapter,
-  options: OfflinePluginOptions,
+  options: OfflinePluginOptions
 ): BetterFetchPlugin {
   const allowlist = getAllowlist(options);
 
@@ -67,19 +78,22 @@ export function createOfflineFetchPlugin(
           if (response.ok) {
             // Clone before reading body so the original response remains usable
             const clone = response.clone();
-            clone.json().then((data) => {
-              const entry: CacheEntry = { data, cachedAt: Date.now() };
-              storage.set(path, entry);
-            }).catch(() => {
-              // Response wasn't JSON or read failed — skip caching
-            });
+            clone
+              .json()
+              .then((data) => {
+                const entry: CacheEntry = { data, cachedAt: Date.now() };
+                storage.set(path, entry);
+              })
+              .catch(() => {
+                // Response wasn't JSON or read failed — skip caching
+              });
           }
 
           return response;
         } catch (error) {
           // Network error — try serving from cache
           if (isNetworkError(error)) {
-            const cached = await storage.get(path) as CacheEntry | null;
+            const cached = (await storage.get(path)) as CacheEntry | null;
             if (cached) {
               return new Response(JSON.stringify(cached.data), {
                 status: 200,

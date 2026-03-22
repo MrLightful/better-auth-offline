@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createOfflineFetchPlugin, extractPath } from "../src/fetch-plugin.js";
 import { offlinePlugin } from "../src/index.js";
 import type { StorageAdapter } from "../src/types.js";
@@ -8,9 +8,15 @@ function createMockStorage(): StorageAdapter & { store: Map<string, unknown> } {
   return {
     store,
     get: vi.fn(async (key) => store.get(key) ?? null),
-    set: vi.fn(async (key, value) => { store.set(key, value); }),
-    delete: vi.fn(async (key) => { store.delete(key); }),
-    clear: vi.fn(async () => { store.clear(); }),
+    set: vi.fn(async (key, value) => {
+      store.set(key, value);
+    }),
+    delete: vi.fn(async (key) => {
+      store.delete(key);
+    }),
+    clear: vi.fn(async () => {
+      store.clear();
+    }),
   };
 }
 
@@ -29,14 +35,19 @@ describe("Plugin configuration", () => {
       includePaths: ["/custom-endpoint"],
     });
 
-    const mockFetch = vi.fn(() => Promise.resolve(jsonResponse({ data: "custom" })));
+    const mockFetch = vi.fn(() =>
+      Promise.resolve(jsonResponse({ data: "custom" }))
+    );
 
     const result = plugin.init!("http://localhost/api/auth/custom-endpoint", {
       method: "GET",
       customFetchImpl: mockFetch,
     });
     const { options } = result instanceof Promise ? await result : result;
-    await options!.customFetchImpl!("http://localhost/api/auth/custom-endpoint", {});
+    await options!.customFetchImpl!(
+      "http://localhost/api/auth/custom-endpoint",
+      {}
+    );
 
     await new Promise((r) => setTimeout(r, 10));
     expect(storage.set).toHaveBeenCalled();
@@ -50,7 +61,7 @@ describe("Plugin configuration", () => {
     });
 
     const mockFetch = vi.fn(() =>
-      Promise.resolve(jsonResponse({ data: "test" })),
+      Promise.resolve(jsonResponse({ data: "test" }))
     );
 
     // /get-session is in default allowlist but NOT in override — should NOT be cached
@@ -58,7 +69,8 @@ describe("Plugin configuration", () => {
       method: "GET",
       customFetchImpl: mockFetch,
     });
-    const { options: opts1 } = result1 instanceof Promise ? await result1 : result1;
+    const { options: opts1 } =
+      result1 instanceof Promise ? await result1 : result1;
     await opts1!.customFetchImpl!("http://localhost/api/auth/get-session", {});
 
     await new Promise((r) => setTimeout(r, 10));
@@ -69,7 +81,8 @@ describe("Plugin configuration", () => {
       method: "GET",
       customFetchImpl: mockFetch,
     });
-    const { options: opts2 } = result2 instanceof Promise ? await result2 : result2;
+    const { options: opts2 } =
+      result2 instanceof Promise ? await result2 : result2;
     await opts2!.customFetchImpl!("http://localhost/api/auth/only-this", {});
 
     await new Promise((r) => setTimeout(r, 10));
@@ -82,7 +95,9 @@ describe("Plugin configuration", () => {
       excludePaths: ["/get-session"],
     });
 
-    const mockFetch = vi.fn(() => Promise.resolve(jsonResponse({ data: "test" })));
+    const mockFetch = vi.fn(() =>
+      Promise.resolve(jsonResponse({ data: "test" }))
+    );
 
     // /get-session is in default allowlist but excluded — should NOT be cached
     const result = plugin.init!("http://localhost/api/auth/get-session", {
@@ -90,7 +105,10 @@ describe("Plugin configuration", () => {
       customFetchImpl: mockFetch,
     });
     const { options } = result instanceof Promise ? await result : result;
-    await options!.customFetchImpl!("http://localhost/api/auth/get-session", {});
+    await options!.customFetchImpl!(
+      "http://localhost/api/auth/get-session",
+      {}
+    );
 
     await new Promise((r) => setTimeout(r, 10));
     expect(storage.set).not.toHaveBeenCalled();
@@ -121,13 +139,15 @@ describe("Plugin configuration", () => {
 describe("extractPath", () => {
   it("extracts pathname from full URL", () => {
     expect(extractPath("http://localhost:3000/api/auth/get-session")).toBe(
-      "/api/auth/get-session",
+      "/api/auth/get-session"
     );
   });
 
   it("strips query parameters from URL", () => {
     expect(
-      extractPath("http://localhost/api/auth/get-session?disableCookieCache=true"),
+      extractPath(
+        "http://localhost/api/auth/get-session?disableCookieCache=true"
+      )
     ).toBe("/api/auth/get-session");
   });
 
@@ -137,7 +157,7 @@ describe("extractPath", () => {
 
   it("strips query params from plain paths", () => {
     expect(extractPath("/api/auth/get-session?foo=bar")).toBe(
-      "/api/auth/get-session",
+      "/api/auth/get-session"
     );
   });
 });

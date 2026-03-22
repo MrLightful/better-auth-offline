@@ -8,7 +8,7 @@ export function createOnlineStatusAtom() {
   const isOnline = atom<boolean>(
     typeof navigator !== "undefined" && typeof navigator.onLine === "boolean"
       ? navigator.onLine
-      : true,
+      : true
   );
 
   if (typeof window !== "undefined") {

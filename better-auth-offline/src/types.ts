@@ -1,8 +1,8 @@
 export interface StorageAdapter {
+  clear(): Promise<void>;
+  delete(key: string): Promise<void>;
   get(key: string): Promise<unknown | null>;
   set(key: string, value: unknown): Promise<void>;
-  delete(key: string): Promise<void>;
-  clear(): Promise<void>;
 }
 
 interface BaseOptions {
@@ -13,31 +13,33 @@ interface BaseOptions {
 }
 
 interface DefaultAllowlistOptions extends BaseOptions {
-  mode?: "default";
-  /**
-   * Additional paths to cache (extends the default allowlist).
-   */
-  includePaths?: string[];
   /**
    * Paths to remove from the default allowlist.
    */
   excludePaths?: string[];
+  /**
+   * Additional paths to cache (extends the default allowlist).
+   */
+  includePaths?: string[];
+  mode?: "default";
 }
 
 interface CustomAllowlistOptions extends BaseOptions {
-  mode: "custom";
   /**
    * Only these paths are cached (default allowlist is ignored).
    */
   allowlist: string[];
+  mode: "custom";
 }
 
-export type OfflinePluginOptions = DefaultAllowlistOptions | CustomAllowlistOptions;
+export type OfflinePluginOptions =
+  | DefaultAllowlistOptions
+  | CustomAllowlistOptions;
 
 /**
  * Shape of a cached response entry.
  */
 export interface CacheEntry {
-  data: unknown;
   cachedAt: number;
+  data: unknown;
 }

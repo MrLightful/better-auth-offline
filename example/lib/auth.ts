@@ -1,6 +1,6 @@
-import { betterAuth } from "better-auth";
 import { createClient } from "@libsql/client";
 import { LibsqlDialect } from "@libsql/kysely-libsql";
+import { betterAuth } from "better-auth";
 
 const client = createClient({ url: "file::memory:" });
 

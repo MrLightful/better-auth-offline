@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
 export function AuthForm() {
@@ -39,25 +39,27 @@ export function AuthForm() {
         Demo credentials are pre-filled below.
       </p>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+      >
         <input
-          type="email"
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           style={inputStyle}
+          type="email"
+          value={email}
         />
         <input
-          type="password"
+          onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
           required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           style={inputStyle}
+          type="password"
+          value={password}
         />
         <button
-          type="submit"
           disabled={loading}
           style={{
             padding: "0.75rem",
@@ -69,6 +71,7 @@ export function AuthForm() {
             cursor: loading ? "not-allowed" : "pointer",
             opacity: loading ? 0.7 : 1,
           }}
+          type="submit"
         >
           {loading ? "Loading..." : "Sign In"}
         </button>

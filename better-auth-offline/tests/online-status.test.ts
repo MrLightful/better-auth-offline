@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 describe("createOnlineStatusAtom", () => {
   let originalWindow: typeof globalThis.window;
@@ -8,13 +8,18 @@ describe("createOnlineStatusAtom", () => {
   beforeEach(() => {
     listeners = { online: [], offline: [] };
     originalWindow = globalThis.window;
-    originalNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+    originalNavigator = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "navigator"
+    );
 
     // Create minimal window mock with addEventListener
     // @ts-expect-error — partial mock
     globalThis.window = {
       addEventListener(event: string, handler: () => void) {
-        if (listeners[event]) listeners[event].push(handler);
+        if (listeners[event]) {
+          listeners[event].push(handler);
+        }
       },
     };
   });
@@ -45,7 +50,9 @@ describe("createOnlineStatusAtom", () => {
     expect(atom.get()).toBe(true);
 
     // Simulate going offline
-    for (const handler of listeners.offline) handler();
+    for (const handler of listeners.offline) {
+      handler();
+    }
     expect(atom.get()).toBe(false);
   });
 
@@ -62,7 +69,9 @@ describe("createOnlineStatusAtom", () => {
     expect(atom.get()).toBe(false);
 
     // Simulate going online
-    for (const handler of listeners.online) handler();
+    for (const handler of listeners.online) {
+      handler();
+    }
     expect(atom.get()).toBe(true);
   });
 
