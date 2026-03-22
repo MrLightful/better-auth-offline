@@ -78,7 +78,7 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "ultracite": "7.3.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
