@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "better-auth": "^1.2.0",
-    "better-auth-offline": "file:..",
+    "better-auth-offline": "workspace:*",
     "@libsql/client": "^0.8.0",
     "@libsql/kysely-libsql": "^0.4.1",
     "next": "^15.0.0",
