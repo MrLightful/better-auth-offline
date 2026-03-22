@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MrLightful/better-auth-offline.git"
+    "url": "git+https://github.com/MrLightful/better-auth-offline.git"
   },
   "homepage": "https://github.com/MrLightful/better-auth-offline",
   "bugs": {
