@@ -5,25 +5,34 @@ export interface StorageAdapter {
   clear(): Promise<void>;
 }
 
-export interface OfflinePluginOptions {
+interface BaseOptions {
   /**
    * Custom storage adapter. Defaults to IndexedDB adapter.
    */
   storage?: StorageAdapter;
+}
+
+interface DefaultAllowlistOptions extends BaseOptions {
+  mode?: "default";
   /**
    * Additional paths to cache (extends the default allowlist).
    */
-  additionalPaths?: string[];
+  includePaths?: string[];
   /**
    * Paths to remove from the default allowlist.
    */
   excludePaths?: string[];
-  /**
-   * Override the default allowlist entirely.
-   * When set, only these paths are cached (default allowlist is ignored).
-   */
-  overrideAllowlist?: string[];
 }
+
+interface CustomAllowlistOptions extends BaseOptions {
+  mode: "custom";
+  /**
+   * Only these paths are cached (default allowlist is ignored).
+   */
+  allowlist: string[];
+}
+
+export type OfflinePluginOptions = DefaultAllowlistOptions | CustomAllowlistOptions;
 
 /**
  * Shape of a cached response entry.

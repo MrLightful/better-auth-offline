@@ -23,10 +23,10 @@ function jsonResponse(data: unknown): Response {
 
 describe("Plugin configuration", () => {
   // T16: Custom allowlist
-  it("extends default allowlist with additionalPaths", async () => {
+  it("extends default allowlist with includePaths", async () => {
     const storage = createMockStorage();
     const plugin = createOfflineFetchPlugin(storage, {
-      additionalPaths: ["/custom-endpoint"],
+      includePaths: ["/custom-endpoint"],
     });
 
     const mockFetch = vi.fn(() => Promise.resolve(jsonResponse({ data: "custom" })));
@@ -42,10 +42,11 @@ describe("Plugin configuration", () => {
     expect(storage.set).toHaveBeenCalled();
   });
 
-  it("overrides default allowlist with overrideAllowlist", async () => {
+  it("overrides default allowlist with allowlist", async () => {
     const storage = createMockStorage();
     const plugin = createOfflineFetchPlugin(storage, {
-      overrideAllowlist: ["/only-this"],
+      mode: "custom",
+      allowlist: ["/only-this"],
     });
 
     const mockFetch = vi.fn(() =>

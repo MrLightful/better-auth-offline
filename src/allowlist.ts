@@ -33,14 +33,14 @@ const DEFAULT_ALLOWLIST = [
  * Get the effective allowlist based on plugin options.
  */
 export function getAllowlist(options: OfflinePluginOptions): string[] {
-  if (options.overrideAllowlist) {
-    return options.overrideAllowlist;
+  if (options.mode === "custom") {
+    return options.allowlist;
   }
   const exclude = new Set(options.excludePaths ?? []);
   const base = exclude.size > 0
     ? DEFAULT_ALLOWLIST.filter((p) => !exclude.has(p))
     : DEFAULT_ALLOWLIST;
-  return [...base, ...(options.additionalPaths ?? [])];
+  return [...base, ...(options.includePaths ?? [])];
 }
 
 /**
