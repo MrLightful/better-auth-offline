@@ -1,6 +1,6 @@
 {
   "name": "better-auth-offline",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Caches better-auth API responses so your app keeps working when the network doesn't.",
   "author": {
     "name": "Roman Sirokov",
