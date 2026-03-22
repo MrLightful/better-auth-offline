@@ -19,7 +19,7 @@
     "@biomejs/biome": "2.4.7",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "turbo": "^2",
+    "turbo": "^2.8.20",
     "ultracite": "7.3.2"
   },
   "lint-staged": {
