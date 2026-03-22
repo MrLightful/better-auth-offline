@@ -1,7 +1,34 @@
 {
   "name": "better-auth-offline",
   "version": "0.1.0",
-  "description": "Offline-first plugin for better-auth. Transparently caches auth API responses for offline use.",
+  "description": "Caches better-auth API responses so your app keeps working when the network doesn't.",
+  "author": {
+    "name": "Roman Sirokov",
+    "email": "roman@mrlightful.com",
+    "url": "https://github.com/MrLightful"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrLightful/better-auth-offline.git"
+  },
+  "homepage": "https://github.com/MrLightful/better-auth-offline",
+  "bugs": {
+    "url": "https://github.com/MrLightful/better-auth-offline/issues"
+  },
+  "keywords": [
+    "better-auth",
+    "offline",
+    "offline-first",
+    "local",
+    "local-first",
+    "pwa",
+    "cache",
+    "service-worker",
+    "authentication",
+    "auth",
+    "session"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -41,13 +68,5 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
-  },
-  "keywords": [
-    "better-auth",
-    "offline",
-    "pwa",
-    "cache",
-    "offline-first"
-  ],
-  "license": "MIT"
+  }
 }
