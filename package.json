@@ -50,9 +50,6 @@
     "README.md",
     "LICENSE"
   ],
-  "workspaces": [
-    "example"
-  ],
   "scripts": {
     "build": "bun run tsup",
     "dev": "bun run tsup --watch",
