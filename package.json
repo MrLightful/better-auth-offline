@@ -1,27 +1,87 @@
 {
-  "name": "better-auth-offline-monorepo",
-  "private": true,
+  "name": "better-auth-offline",
+  "version": "0.0.1",
+  "description": "Caches better-auth API responses so your app keeps working when the network doesn't.",
+  "author": {
+    "name": "Roman Sirokov",
+    "email": "roman@mrlightful.com",
+    "url": "https://github.com/MrLightful"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrLightful/better-auth-offline.git"
+  },
+  "homepage": "https://github.com/MrLightful/better-auth-offline",
+  "bugs": {
+    "url": "https://github.com/MrLightful/better-auth-offline/issues"
+  },
+  "keywords": [
+    "better-auth",
+    "offline",
+    "offline-first",
+    "local",
+    "local-first",
+    "pwa",
+    "cache",
+    "service-worker",
+    "authentication",
+    "auth",
+    "session"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./adapters": {
+      "types": "./dist/adapters/indexeddb.d.ts",
+      "import": "./dist/adapters/indexeddb.js",
+      "require": "./dist/adapters/indexeddb.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "workspaces": [
-    "better-auth-offline",
     "example"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "test": "turbo run test",
-    "typecheck": "turbo run typecheck",
+    "build": "bun run tsup",
+    "dev": "bun run tsup --watch",
+    "test": "bun run vitest run",
+    "test:watch": "bun run vitest",
+    "typecheck": "bun run tsc --noEmit",
     "check": "ultracite check",
     "fix": "ultracite fix",
     "prepare": "husky"
   },
   "packageManager": "bun@1.3.10",
+  "peerDependencies": {
+    "better-auth": ">=1.0.0"
+  },
+  "dependencies": {
+    "nanostores": "^1.2.0"
+  },
   "devDependencies": {
+    "@better-fetch/fetch": "^1.1.21",
     "@biomejs/biome": "2.4.7",
     "@changesets/cli": "^2.30.0",
+    "better-auth": "^1.5.6",
+    "fake-indexeddb": "^6.2.5",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "turbo": "^2.8.20",
-    "ultracite": "7.3.2"
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "ultracite": "7.3.2",
+    "vitest": "^3.2.4"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
