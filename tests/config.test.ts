@@ -22,48 +22,77 @@ function jsonResponse(data: unknown): Response {
 }
 
 describe("Plugin configuration", () => {
-  // T16: Custom blocklist
-  it("extends default blocklist with excludePaths", async () => {
+  // T16: Custom allowlist
+  it("extends default allowlist with additionalPaths", async () => {
     const storage = createMockStorage();
     const plugin = createOfflineFetchPlugin(storage, {
-      excludePaths: ["/custom-sensitive"],
+      additionalPaths: ["/custom-endpoint"],
     });
 
-    const mockFetch = vi.fn(() => Promise.resolve(jsonResponse({ data: "secret" })));
+    const mockFetch = vi.fn(() => Promise.resolve(jsonResponse({ data: "custom" })));
 
-    const result = plugin.init!("http://localhost/api/auth/custom-sensitive", {
+    const result = plugin.init!("http://localhost/api/auth/custom-endpoint", {
       method: "GET",
       customFetchImpl: mockFetch,
     });
     const { options } = result instanceof Promise ? await result : result;
-    await options!.customFetchImpl!("http://localhost/api/auth/custom-sensitive", {});
+    await options!.customFetchImpl!("http://localhost/api/auth/custom-endpoint", {});
 
     await new Promise((r) => setTimeout(r, 10));
-    expect(storage.set).not.toHaveBeenCalled();
+    expect(storage.set).toHaveBeenCalled();
   });
 
-  it("overrides default blocklist with overrideBlocklist", async () => {
+  it("overrides default allowlist with overrideAllowlist", async () => {
     const storage = createMockStorage();
-    // Override with empty blocklist — nothing is blocked
     const plugin = createOfflineFetchPlugin(storage, {
-      overrideBlocklist: [],
+      overrideAllowlist: ["/only-this"],
     });
 
     const mockFetch = vi.fn(() =>
-      Promise.resolve(jsonResponse({ codes: ["abc"] })),
+      Promise.resolve(jsonResponse({ data: "test" })),
     );
 
-    // This path is in default blocklist but should now be cached
-    const result = plugin.init!("http://localhost/api/auth/two-factor/backup-codes", {
+    // /get-session is in default allowlist but NOT in override — should NOT be cached
+    const result1 = plugin.init!("http://localhost/api/auth/get-session", {
+      method: "GET",
+      customFetchImpl: mockFetch,
+    });
+    const { options: opts1 } = result1 instanceof Promise ? await result1 : result1;
+    await opts1!.customFetchImpl!("http://localhost/api/auth/get-session", {});
+
+    await new Promise((r) => setTimeout(r, 10));
+    expect(storage.set).not.toHaveBeenCalled();
+
+    // /only-this IS in override — should be cached
+    const result2 = plugin.init!("http://localhost/api/auth/only-this", {
+      method: "GET",
+      customFetchImpl: mockFetch,
+    });
+    const { options: opts2 } = result2 instanceof Promise ? await result2 : result2;
+    await opts2!.customFetchImpl!("http://localhost/api/auth/only-this", {});
+
+    await new Promise((r) => setTimeout(r, 10));
+    expect(storage.set).toHaveBeenCalled();
+  });
+
+  it("excludes paths from default allowlist with excludePaths", async () => {
+    const storage = createMockStorage();
+    const plugin = createOfflineFetchPlugin(storage, {
+      excludePaths: ["/get-session"],
+    });
+
+    const mockFetch = vi.fn(() => Promise.resolve(jsonResponse({ data: "test" })));
+
+    // /get-session is in default allowlist but excluded — should NOT be cached
+    const result = plugin.init!("http://localhost/api/auth/get-session", {
       method: "GET",
       customFetchImpl: mockFetch,
     });
     const { options } = result instanceof Promise ? await result : result;
-    await options!.customFetchImpl!("http://localhost/api/auth/two-factor/backup-codes", {});
+    await options!.customFetchImpl!("http://localhost/api/auth/get-session", {});
 
-    await vi.waitFor(() => {
-      expect(storage.set).toHaveBeenCalled();
-    });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(storage.set).not.toHaveBeenCalled();
   });
 
   // T17: Custom storage adapter

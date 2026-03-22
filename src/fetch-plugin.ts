@@ -1,6 +1,6 @@
 import type { BetterFetchPlugin } from "@better-fetch/fetch";
 import type { StorageAdapter, CacheEntry, OfflinePluginOptions } from "./types.js";
-import { getBlocklist, isBlocklisted } from "./blocklist.js";
+import { getAllowlist, isAllowlisted } from "./allowlist.js";
 
 /**
  * Extracts the pathname from a URL string, stripping query params.
@@ -37,13 +37,13 @@ function isNetworkError(error: unknown): boolean {
  * - Uses `init` to inject a custom fetch that wraps the real fetch
  * - On successful GET: caches the response body (fire-and-forget)
  * - On network error for GET: serves cached response if available
- * - POST/PUT/DELETE and blocklisted paths: passthrough, no caching
+ * - Only allowlisted GET paths are cached; everything else passes through
  */
 export function createOfflineFetchPlugin(
   storage: StorageAdapter,
   options: OfflinePluginOptions,
 ): BetterFetchPlugin {
-  const blocklist = getBlocklist(options);
+  const allowlist = getAllowlist(options);
 
   return {
     id: "better-auth-offline",
@@ -53,7 +53,7 @@ export function createOfflineFetchPlugin(
       const originalFetch = fetchOptions?.customFetchImpl ?? globalThis.fetch;
       const method = (fetchOptions?.method ?? "GET").toUpperCase();
       const path = extractPath(url);
-      const shouldCache = method === "GET" && !isBlocklisted(path, blocklist);
+      const shouldCache = method === "GET" && isAllowlisted(path, allowlist);
 
       const wrappedFetch: typeof globalThis.fetch = async (input, init) => {
         if (!shouldCache) {

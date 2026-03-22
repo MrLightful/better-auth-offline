@@ -11,14 +11,18 @@ export interface OfflinePluginOptions {
    */
   storage?: StorageAdapter;
   /**
-   * Additional paths to exclude from caching (extends the default blocklist).
+   * Additional paths to cache (extends the default allowlist).
+   */
+  additionalPaths?: string[];
+  /**
+   * Paths to remove from the default allowlist.
    */
   excludePaths?: string[];
   /**
-   * Override the default blocklist entirely.
-   * When set, only these paths are excluded (default blocklist is ignored).
+   * Override the default allowlist entirely.
+   * When set, only these paths are cached (default allowlist is ignored).
    */
-  overrideBlocklist?: string[];
+  overrideAllowlist?: string[];
 }
 
 /**

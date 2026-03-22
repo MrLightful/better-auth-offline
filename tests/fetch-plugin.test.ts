@@ -53,9 +53,8 @@ describe("createOfflineFetchPlugin", () => {
     expect(mockFetch).toHaveBeenCalledOnce();
 
     // Wait for fire-and-forget cache write
-    await vi.waitFor(() => {
-      expect(storage.set).toHaveBeenCalled();
-    });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(storage.set).toHaveBeenCalled();
 
     const cached = storage.store.get("/api/auth/get-session") as CacheEntry;
     expect(cached.data).toEqual({ user: "alice" });
@@ -158,20 +157,20 @@ describe("createOfflineFetchPlugin", () => {
     expect(storage.set).not.toHaveBeenCalled();
   });
 
-  // T7: Blocklisted path → skips caching
-  it("skips caching for blocklisted paths", async () => {
+  // T7: Non-allowlisted path → skips caching
+  it("skips caching for non-allowlisted paths", async () => {
     const plugin = createOfflineFetchPlugin(storage, {});
     const mockFetch = vi.fn(() =>
-      Promise.resolve(jsonResponse({ codes: ["abc", "def"] })),
+      Promise.resolve(jsonResponse({ data: "something" })),
     );
 
-    const result = plugin.init!("http://localhost/api/auth/two-factor/backup-codes", {
+    const result = plugin.init!("http://localhost/api/auth/some-unknown-endpoint", {
       method: "GET",
       customFetchImpl: mockFetch,
     });
 
     const { options } = result instanceof Promise ? await result : result;
-    await options!.customFetchImpl!("http://localhost/api/auth/two-factor/backup-codes", {});
+    await options!.customFetchImpl!("http://localhost/api/auth/some-unknown-endpoint", {});
 
     expect(mockFetch).toHaveBeenCalledOnce();
 
@@ -210,8 +209,7 @@ describe("createOfflineFetchPlugin", () => {
     const data = await response.json();
     expect(data).toEqual({ user: "alice" });
 
-    await vi.waitFor(() => {
-      expect(storage.set).toHaveBeenCalled();
-    });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(storage.set).toHaveBeenCalled();
   });
 });

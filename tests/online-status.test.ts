@@ -27,7 +27,8 @@ describe("createOnlineStatusAtom", () => {
       // @ts-expect-error — restoring
       delete globalThis.navigator;
     }
-    vi.resetModules();
+    // vi.resetModules() not available in bun — not needed since
+    // createOnlineStatusAtom is a factory that creates fresh atoms.
   });
 
   // T12: online → offline transition
