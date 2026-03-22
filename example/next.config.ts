@@ -2,7 +2,6 @@ import { resolve } from "path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["better-sqlite3"],
   outputFileTracingRoot: resolve(import.meta.dirname, ".."),
   async headers() {
     return [
