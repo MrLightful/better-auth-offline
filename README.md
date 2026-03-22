@@ -1,5 +1,8 @@
 # better-auth-offline
 
+[![NPM Version](https://img.shields.io/npm/v/better-auth-offline)](https://www.npmjs.com/package/better-auth-offline)
+[![NPM Downloads](https://img.shields.io/npm/dm/better-auth-offline)](https://www.npmjs.com/package/better-auth-offline)
+
 Offline-first plugin for [better-auth](https://github.com/better-auth/better-auth). Transparently caches auth API responses so your app keeps working when the network doesn't.
 
 ## Why offline-first?

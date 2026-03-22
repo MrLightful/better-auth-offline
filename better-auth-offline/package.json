@@ -46,10 +46,12 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "build": "bun run tsup",
+    "build": "bun run tsup && cp ../README.md README.md && cp ../LICENSE LICENSE",
     "dev": "bun run tsup --watch",
     "test": "bun run vitest run",
     "test:watch": "bun run vitest",
