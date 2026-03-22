@@ -123,7 +123,7 @@ export default function Dashboard() {
 function OnlineIndicator() {
   // @ts-expect-error — useOnlineStatus is added by the offline plugin
   const status = authClient.useOnlineStatus();
-  const isOnline = status?.data ?? true;
+  const isOnline = status ?? true;
 
   return (
     <div
